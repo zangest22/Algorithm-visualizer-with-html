@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Algorithm Visualizer</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f7f7f5;
+    --bg-tertiary: #f0efe9;
+    --text-primary: #1a1a1a;
+    --text-secondary: #6b6b68;
+    --text-hint: #9b9b97;
+    --border-light: rgba(0,0,0,0.08);
+    --border-mid: rgba(0,0,0,0.14);
+    --border-strong: rgba(0,0,0,0.22);
+    --purple-light: #EEEDFE;
+    --purple-mid: #534AB7;
+    --purple-dark: #3C3489;
+    --teal-light: #E1F5EE;
+    --teal-mid: #1D9E75;
+    --teal-dark: #0F6E56;
+    --coral-light: #FAECE7;
+    --coral-mid: #D85A30;
+    --amber-light: #FAEEDA;
+    --amber-mid: #BA7517;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 40px;
+  }
+
+  header {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .logo {
+    width: 36px; height: 36px;
+    background: var(--purple-mid);
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .header-text h1 {
+    font-size: 18px; font-weight: 600; color: var(--text-primary); line-height: 1.2;
+  }
+  .header-text p {
+    font-size: 13px; color: var(--text-secondary); margin-top: 1px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 1100px;
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    border: 0.5px solid var(--border-light);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border-bottom: 0.5px solid var(--border-light);
+    flex-wrap: wrap;
+  }
+
+  .label-sm {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+
+  .lang-group { display: flex; gap: 4px; }
+
+  .lang-btn {
+    padding: 5px 13px;
+    font-size: 13px;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border-mid);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.14s;
+    line-height: 1.4;
+  }
+  .lang-btn:hover:not(.active) {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
+  .lang-btn.active {
+    background: var(--purple-mid);
+    color: #fff;
+    border-color: var(--purple-mid);
+    font-weight: 500;
+  }
+
+  .snippet-wrap { display: flex; align-items: center; gap: 6px; }
+
+  select {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    border: 0.5px solid var(--border-mid);
+    border-radius: var(--radius-sm);
+    padding: 5px 10px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.14s;
+    height: 32px;
+  }
+  select:focus { border-color: var(--purple-mid); }
+
+  .run-btn {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 18px;
+    font-size: 13px;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    background: var(--teal-mid);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.14s;
+    height: 32px;
+  }
+  .run-btn:hover { background: var(--teal-dark); }
+  .run-btn i { font-size: 15px; }
+
+  /* ── Main Area ── */
+  .main-area {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    min-height: 380px;
+    border-bottom: 0.5px solid var(--border-light);
+  }
+
+  .left-panel {
+    border-right: 0.5px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    background: var(--bg-secondary);
+    border-bottom: 0.5px solid var(--border-light);
+  }
+  .panel-header i { font-size: 14px; }
+
+  #code-lines {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 0;
+    background: var(--bg-primary);
+  }
+
+  .code-line {
+    display: flex;
+    align-items: stretch;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.75;
+    white-space: pre;
+    color: var(--text-primary);
+    border-left: 3px solid transparent;
+    padding: 0 14px 0 0;
+    transition: background 0.15s, border-color 0.15s;
+    cursor: default;
+  }
+  .code-line.active {
+    background: var(--purple-light);
+    border-left-color: var(--purple-mid);
+  }
+  .line-num {
+    display: inline-block;
+    width: 36px;
+    text-align: right;
+    color: var(--text-hint);
+    font-size: 11px;
+    padding-right: 12px;
+    flex-shrink: 0;
+    user-select: none;
+    line-height: 1.75;
+  }
+  .code-line.active .line-num { color: var(--purple-mid); }
+  .line-text { flex: 1; }
+
+  /* ── Right Panel ── */
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #vars-body {
+    flex: 1;
+    padding: 12px 14px;
+    overflow-y: auto;
+    min-height: 100px;
+  }
+
+  .empty-state {
+    font-size: 13px;
+    color: var(--text-hint);
+    font-style: italic;
+    padding: 4px 0;
+  }
+
+  .var-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 0.5px solid var(--border-light);
+    font-size: 13px;
+  }
+  .var-row:last-child { border-bottom: none; }
+  .var-name {
+    font-family: var(--font-mono);
+    color: var(--purple-mid);
+    font-size: 12px;
+    min-width: 70px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .var-val {
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    font-size: 12px;
+    flex: 1;
+    word-break: break-all;
+  }
+  .var-changed { color: var(--teal-mid) !important; font-weight: 500; }
+
+  /* ── Array Viz ── */
+  #array-viz {
+    display: none;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 12px 14px;
+    border-top: 0.5px solid var(--border-light);
+    background: var(--bg-secondary);
+  }
+
+  .arr-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px; height: 38px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border-mid);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: all 0.22s;
+  }
+  .arr-cell.comparing { background: var(--purple-light); border-color: var(--purple-mid); color: var(--purple-mid); }
+  .arr-cell.swapping  { background: var(--coral-light);  border-color: var(--coral-mid);  color: var(--coral-mid); }
+  .arr-cell.sorted    { background: var(--teal-light);   border-color: var(--teal-mid);   color: var(--teal-dark); }
+  .arr-cell.pivot     { background: var(--amber-light);  border-color: var(--amber-mid);  color: var(--amber-mid); }
+
+  /* ── Step Info ── */
+  .step-info {
+    border-top: 0.5px solid var(--border-light);
+    padding: 10px 14px;
+    background: var(--bg-primary);
+  }
+  .step-num {
+    font-size: 11px;
+    color: var(--text-hint);
+    margin-bottom: 4px;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+  .step-desc {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.6;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    gap: 10px;
+    padding: 8px 14px;
+    border-top: 0.5px solid var(--border-light);
+    background: var(--bg-secondary);
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    border: 0.5px solid transparent;
+  }
+  .legend-dot.comparing { background: var(--purple-light); border-color: var(--purple-mid); }
+  .legend-dot.swapping  { background: var(--coral-light); border-color: var(--coral-mid); }
+  .legend-dot.sorted    { background: var(--teal-light); border-color: var(--teal-mid); }
+
+  /* ── Output Panel ── */
+  .output-panel {
+    border-top: 0.5px solid var(--border-light);
+  }
+  #output-body {
+    padding: 8px 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+    min-height: 44px;
+    max-height: 70px;
+    overflow-y: auto;
+    line-height: 1.6;
+    background: #1e1e2e;
+    border-radius: 0 0 0 0;
+  }
+  .panel-header.dark {
+    background: #2a2a3e;
+    color: #9b9baa;
+    border-bottom-color: rgba(255,255,255,0.06);
+  }
+  .out-line { display: flex; gap: 8px; }
+  .out-prompt { color: #1D9E75; }
+  .out-text { color: #e0e0e8; }
+  .out-empty { color: #555566; font-style: italic; }
+
+  /* ── Controls Bar ── */
+  .controls-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--bg-secondary);
+    border-top: 0.5px solid var(--border-light);
+    flex-wrap: wrap;
+  }
+
+  .ctrl-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 13px;
+    font-size: 13px;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border-mid);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.12s;
+    height: 32px;
+  }
+  .ctrl-btn:hover:not(:disabled) {
+    background: var(--bg-secondary);
+    border-color: var(--border-strong);
+  }
+  .ctrl-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .ctrl-btn i { font-size: 15px; }
+  .ctrl-btn.accent {
+    background: var(--purple-light);
+    color: var(--purple-mid);
+    border-color: rgba(83,74,183,0.25);
+  }
+  .ctrl-btn.accent:hover:not(:disabled) {
+    background: #e0defa;
+  }
+
+  .speed-wrap { display: flex; align-items: center; gap: 6px; }
+  .speed-wrap label { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+  .speed-wrap input[type=range] {
+    width: 80px; height: 4px; cursor: pointer; accent-color: var(--purple-mid);
+  }
+
+  .progress-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+  }
+  #progress-bar-bg {
+    flex: 1;
+    height: 4px;
+    background: var(--border-light);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  #progress-bar-fill {
+    height: 100%;
+    background: var(--purple-mid);
+    width: 0%;
+    transition: width 0.2s;
+    border-radius: 4px;
+  }
+  #step-counter {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    min-width: 52px;
+    text-align: right;
+    font-family: var(--font-mono);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 700px) {
+    .main-area { grid-template-columns: 1fr; }
+    .left-panel { border-right: none; border-bottom: 0.5px solid var(--border-light); min-height: 260px; }
+    .right-panel { min-height: 200px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><i class="ti ti-binary-tree"></i></div>
+  <div class="header-text">
+    <h1>Algorithm Visualizer</h1>
+    <p>Watch your code run step by step — Python, Java, JavaScript</p>
+  </div>
+</header>
+
+<div class="card">
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <span class="label-sm">Language</span>
+    <div class="lang-group">
+      <button class="lang-btn active" data-lang="python">Python</button>
+      <button class="lang-btn" data-lang="javascript">JavaScript</button>
+      <button class="lang-btn" data-lang="java">Java</button>
+    </div>
+    <div class="snippet-wrap">
+      <span class="label-sm">Snippet</span>
+      <select id="snippet-select"></select>
+    </div>
+    <button class="run-btn" id="run-btn">
+      <i class="ti ti-player-play"></i> Visualize
+    </button>
+  </div>
+
+  <!-- Main -->
+  <div class="main-area">
+
+    <!-- Code panel -->
+    <div class="left-panel">
+      <div class="panel-header"><i class="ti ti-code"></i> code</div>
+      <div id="code-lines"></div>
+    </div>
+
+    <!-- Right panels -->
+    <div class="right-panel">
+      <div class="panel-header"><i class="ti ti-variable"></i> variables</div>
+      <div id="vars-body"><p class="empty-state">Press Visualize to start</p></div>
+      <div id="array-viz"></div>
+      <div class="legend" id="legend" style="display:none;">
+        <div class="legend-item"><div class="legend-dot comparing"></div>comparing</div>
+        <div class="legend-item"><div class="legend-dot swapping"></div>swapping</div>
+        <div class="legend-item"><div class="legend-dot sorted"></div>sorted</div>
+      </div>
+      <div class="step-info">
+        <div class="step-num" id="step-num">—</div>
+        <div class="step-desc" id="step-desc">Select a snippet and press Visualize</div>
+      </div>
+      <div class="output-panel">
+        <div class="panel-header dark"><i class="ti ti-terminal"></i> output</div>
+        <div id="output-body"><span class="out-empty">no output yet</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-bar">
+    <button class="ctrl-btn" id="prev-btn" disabled><i class="ti ti-chevron-left"></i> Prev</button>
+    <button class="ctrl-btn" id="next-btn" disabled><i class="ti ti-chevron-right"></i> Next</button>
+    <button class="ctrl-btn accent" id="auto-btn" disabled><i class="ti ti-player-play"></i> Auto</button>
+    <div class="speed-wrap">
+      <label for="speed-range">Speed</label>
+      <input type="range" id="speed-range" min="1" max="5" value="3" step="1" />
+    </div>
+    <div class="progress-wrap">
+      <div id="progress-bar-bg"><div id="progress-bar-fill"></div></div>
+      <span id="step-counter">0 / 0</span>
+    </div>
+    <button class="ctrl-btn" id="reset-btn"><i class="ti ti-refresh"></i> Reset</button>
+  </div>
+
+</div>
+
+<script>
+const SNIPPETS = {
+  python: {
+    "Bubble Sort": {
+      code: `arr = [64, 34, 25, 12, 22, 11, 90]
+n = len(arr)
+
+for i in range(n):
+    for j in range(0, n-i-1):
+        if arr[j] > arr[j+1]:
+            arr[j], arr[j+1] = arr[j+1], arr[j]
+
+print(arr)`,
+      steps: [
+        { line:0, desc:"Initialize array with 7 unsorted values", vars:{arr:[64,34,25,12,22,11,90]}, arr:[64,34,25,12,22,11,90] },
+        { line:1, desc:"Get length of array: n = 7", vars:{n:7} },
+        { line:3, desc:"Outer loop starts: i = 0", vars:{i:0} },
+        { line:4, desc:"Inner loop: j = 0. Compare arr[0]=64 vs arr[1]=34", vars:{j:0}, arr:[64,34,25,12,22,11,90], compare:[0,1] },
+        { line:5, desc:"64 > 34 is true — swap!", vars:{}, arr:[64,34,25,12,22,11,90], swapping:[0,1] },
+        { line:6, desc:"Swap done. arr = [34, 64, 25, 12, 22, 11, 90]", vars:{arr:[34,64,25,12,22,11,90]}, arr:[34,64,25,12,22,11,90] },
+        { line:4, desc:"j = 1. Compare arr[1]=64 vs arr[2]=25", vars:{j:1}, arr:[34,64,25,12,22,11,90], compare:[1,2] },
+        { line:6, desc:"64 > 25 — swap! arr = [34, 25, 64, 12, 22, 11, 90]", vars:{arr:[34,25,64,12,22,11,90]}, arr:[34,25,64,12,22,11,90], swapping:[1,2] },
+        { line:4, desc:"j = 2. Compare arr[2]=64 vs arr[3]=12", vars:{j:2}, arr:[34,25,64,12,22,11,90], compare:[2,3] },
+        { line:6, desc:"64 > 12 — swap! arr = [34, 25, 12, 64, 22, 11, 90]", vars:{arr:[34,25,12,64,22,11,90]}, arr:[34,25,12,64,22,11,90], swapping:[2,3] },
+        { line:4, desc:"j = 3. Compare arr[3]=64 vs arr[4]=22", vars:{j:3}, arr:[34,25,12,64,22,11,90], compare:[3,4] },
+        { line:6, desc:"64 > 22 — swap! arr = [34, 25, 12, 22, 64, 11, 90]", vars:{arr:[34,25,12,22,64,11,90]}, arr:[34,25,12,22,64,11,90], swapping:[3,4] },
+        { line:4, desc:"j = 4. Compare arr[4]=64 vs arr[5]=11", vars:{j:4}, arr:[34,25,12,22,64,11,90], compare:[4,5] },
+        { line:6, desc:"64 > 11 — swap! arr = [34, 25, 12, 22, 11, 64, 90]", vars:{arr:[34,25,12,22,11,64,90]}, arr:[34,25,12,22,11,64,90], swapping:[4,5] },
+        { line:4, desc:"j = 5. Compare arr[5]=64 vs arr[6]=90", vars:{j:5}, arr:[34,25,12,22,11,64,90], compare:[5,6] },
+        { line:5, desc:"64 > 90 is false — no swap needed", vars:{}, arr:[34,25,12,22,11,64,90] },
+        { line:3, desc:"Pass 1 complete. 90 bubbled to the end ✓", vars:{i:1}, arr:[34,25,12,22,11,64,90], sorted:[6] },
+        { line:4, desc:"i=1, j=0. Compare 34 vs 25 — swap!", vars:{j:0}, arr:[34,25,12,22,11,64,90], compare:[0,1] },
+        { line:6, desc:"arr = [25, 34, 12, 22, 11, 64, 90]", vars:{arr:[25,34,12,22,11,64,90]}, arr:[25,34,12,22,11,64,90], swapping:[0,1] },
+        { line:4, desc:"j=1. Compare 34 vs 12 — swap!", vars:{j:1}, arr:[25,34,12,22,11,64,90], compare:[1,2] },
+        { line:6, desc:"arr = [25, 12, 34, 22, 11, 64, 90]", vars:{arr:[25,12,34,22,11,64,90]}, arr:[25,12,34,22,11,64,90], swapping:[1,2] },
+        { line:4, desc:"j=2. Compare 34 vs 22 — swap!", vars:{j:2}, arr:[25,12,34,22,11,64,90], compare:[2,3] },
+        { line:6, desc:"arr = [25, 12, 22, 34, 11, 64, 90]", vars:{arr:[25,12,22,34,11,64,90]}, arr:[25,12,22,34,11,64,90], swapping:[2,3] },
+        { line:4, desc:"j=3. Compare 34 vs 11 — swap!", vars:{j:3}, arr:[25,12,22,34,11,64,90], compare:[3,4] },
+        { line:6, desc:"arr = [25, 12, 22, 11, 34, 64, 90]", vars:{arr:[25,12,22,11,34,64,90]}, arr:[25,12,22,11,34,64,90], swapping:[3,4] },
+        { line:3, desc:"Pass 2 done. 64, 90 are sorted ✓", vars:{i:2}, arr:[25,12,22,11,34,64,90], sorted:[5,6] },
+        { line:4, desc:"i=2. Multiple passes: 25→12, 22→11...", vars:{j:0}, arr:[25,12,22,11,34,64,90], compare:[0,1] },
+        { line:6, desc:"Pass 3 complete. arr = [12, 22, 11, 25, 34, 64, 90]", vars:{arr:[12,22,11,25,34,64,90]}, arr:[12,22,11,25,34,64,90], sorted:[4,5,6] },
+        { line:3, desc:"Pass 4. Comparing 12, 22, 11...", vars:{i:3}, arr:[12,22,11,25,34,64,90] },
+        { line:6, desc:"arr = [12, 11, 22, 25, 34, 64, 90]", vars:{arr:[12,11,22,25,34,64,90]}, arr:[12,11,22,25,34,64,90], sorted:[3,4,5,6] },
+        { line:3, desc:"Pass 5. Final swap: 12 vs 11", vars:{i:4}, arr:[12,11,22,25,34,64,90], compare:[0,1] },
+        { line:6, desc:"arr = [11, 12, 22, 25, 34, 64, 90]", vars:{arr:[11,12,22,25,34,64,90]}, arr:[11,12,22,25,34,64,90], swapping:[0,1] },
+        { line:8, desc:"✅ Sort complete! print([11, 12, 22, 25, 34, 64, 90])", vars:{arr:[11,12,22,25,34,64,90]}, arr:[11,12,22,25,34,64,90], sorted:[0,1,2,3,4,5,6], output:"[11, 12, 22, 25, 34, 64, 90]" }
+      ]
+    },
+    "Binary Search": {
+      code: `arr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]
+target = 23
+low = 0
+high = len(arr) - 1
+
+while low <= high:
+    mid = (low + high) // 2
+    if arr[mid] == target:
+        print("Found at index", mid)
+        break
+    elif arr[mid] < target:
+        low = mid + 1
+    else:
+        high = mid - 1`,
+      steps: [
+        { line:0, desc:"Sorted array of 10 values", vars:{arr:[2,5,8,12,16,23,38,56,72,91]}, arr:[2,5,8,12,16,23,38,56,72,91] },
+        { line:1, desc:"Set target = 23", vars:{target:23} },
+        { line:2, desc:"low = 0 (left boundary)", vars:{low:0} },
+        { line:3, desc:"high = 9 (right boundary)", vars:{high:9} },
+        { line:5, desc:"0 <= 9 — enter while loop", vars:{} },
+        { line:6, desc:"mid = (0 + 9) // 2 = 4", vars:{mid:4}, arr:[2,5,8,12,16,23,38,56,72,91], compare:[4] },
+        { line:7, desc:"arr[4] = 16. Is 16 == 23? No.", vars:{}, arr:[2,5,8,12,16,23,38,56,72,91], compare:[4] },
+        { line:10, desc:"16 < 23 — target is in right half. low = 5", vars:{low:5} },
+        { line:5, desc:"5 <= 9 — continue", vars:{} },
+        { line:6, desc:"mid = (5 + 9) // 2 = 7", vars:{mid:7}, arr:[2,5,8,12,16,23,38,56,72,91], compare:[7] },
+        { line:7, desc:"arr[7] = 56. Is 56 == 23? No.", vars:{}, arr:[2,5,8,12,16,23,38,56,72,91], compare:[7] },
+        { line:12, desc:"56 > 23 — target is in left half. high = 6", vars:{high:6} },
+        { line:5, desc:"5 <= 6 — continue", vars:{} },
+        { line:6, desc:"mid = (5 + 6) // 2 = 5", vars:{mid:5}, arr:[2,5,8,12,16,23,38,56,72,91], compare:[5] },
+        { line:7, desc:"arr[5] = 23. Is 23 == 23? YES! 🎯", vars:{}, arr:[2,5,8,12,16,23,38,56,72,91], sorted:[5] },
+        { line:8, desc:"✅ Found target 23 at index 5!", vars:{}, output:"Found at index 5" }
+      ]
+    },
+    "Fibonacci": {
+      code: `def fibonacci(n):
+    if n <= 1:
+        return n
+    a, b = 0, 1
+    for i in range(2, n + 1):
+        a, b = b, a + b
+    return b
+
+result = fibonacci(8)
+print(result)`,
+      steps: [
+        { line:8, desc:"Call fibonacci(8) — compute 8th Fibonacci number", vars:{n:8} },
+        { line:1, desc:"n=8. Is 8 <= 1? No — proceed.", vars:{} },
+        { line:3, desc:"Initialize a=0, b=1 (first two Fibonacci numbers)", vars:{a:0,b:1} },
+        { line:4, desc:"Start loop: i = 2", vars:{i:2} },
+        { line:5, desc:"a, b = b, a+b = 1, 0+1 = 1, 1", vars:{a:1,b:1,i:2} },
+        { line:4, desc:"i = 3", vars:{i:3} },
+        { line:5, desc:"a, b = 1, 1+1 = 1, 2", vars:{a:1,b:2,i:3} },
+        { line:4, desc:"i = 4", vars:{i:4} },
+        { line:5, desc:"a, b = 2, 1+2 = 2, 3", vars:{a:2,b:3,i:4} },
+        { line:4, desc:"i = 5", vars:{i:5} },
+        { line:5, desc:"a, b = 3, 2+3 = 3, 5", vars:{a:3,b:5,i:5} },
+        { line:4, desc:"i = 6", vars:{i:6} },
+        { line:5, desc:"a, b = 5, 3+5 = 5, 8", vars:{a:5,b:8,i:6} },
+        { line:4, desc:"i = 7", vars:{i:7} },
+        { line:5, desc:"a, b = 8, 5+8 = 8, 13", vars:{a:8,b:13,i:7} },
+        { line:4, desc:"i = 8", vars:{i:8} },
+        { line:5, desc:"a, b = 13, 8+13 = 13, 21", vars:{a:13,b:21,i:8} },
+        { line:6, desc:"Loop ends. Return b = 21", vars:{} },
+        { line:9, desc:"✅ result = 21. The 8th Fibonacci number is 21.", vars:{result:21}, output:"21" }
+      ]
+    },
+    "Selection Sort": {
+      code: `arr = [29, 10, 14, 37, 13]
+n = len(arr)
+
+for i in range(n - 1):
+    min_idx = i
+    for j in range(i + 1, n):
+        if arr[j] < arr[min_idx]:
+            min_idx = j
+    arr[i], arr[min_idx] = arr[min_idx], arr[i]
+
+print(arr)`,
+      steps: [
+        { line:0, desc:"Initialize array [29, 10, 14, 37, 13]", vars:{arr:[29,10,14,37,13]}, arr:[29,10,14,37,13] },
+        { line:1, desc:"n = 5", vars:{n:5} },
+        { line:3, desc:"Outer loop: i = 0", vars:{i:0} },
+        { line:4, desc:"Assume arr[0]=29 is minimum. min_idx = 0", vars:{min_idx:0}, arr:[29,10,14,37,13], compare:[0] },
+        { line:5, desc:"j = 1. Is arr[1]=10 < arr[0]=29? Yes! min_idx = 1", vars:{j:1,min_idx:1}, arr:[29,10,14,37,13], compare:[1] },
+        { line:5, desc:"j = 2. Is arr[2]=14 < arr[1]=10? No.", vars:{j:2}, arr:[29,10,14,37,13], compare:[2] },
+        { line:5, desc:"j = 3. Is arr[3]=37 < arr[1]=10? No.", vars:{j:3}, arr:[29,10,14,37,13], compare:[3] },
+        { line:5, desc:"j = 4. Is arr[4]=13 < arr[1]=10? No. min_idx stays 1.", vars:{j:4,min_idx:1}, arr:[29,10,14,37,13], compare:[4] },
+        { line:8, desc:"Swap arr[0]=29 with arr[1]=10 (the minimum)", vars:{}, arr:[29,10,14,37,13], swapping:[0,1] },
+        { line:8, desc:"arr = [10, 29, 14, 37, 13]. 10 is sorted ✓", vars:{arr:[10,29,14,37,13]}, arr:[10,29,14,37,13], sorted:[0] },
+        { line:3, desc:"i = 1. Find minimum in [29, 14, 37, 13]", vars:{i:1} },
+        { line:4, desc:"min_idx = 1 (arr[1] = 29)", vars:{min_idx:1} },
+        { line:5, desc:"j=2: 14<29 → min_idx=2. j=3: 37>14. j=4: 13<14 → min_idx=4", vars:{min_idx:4}, arr:[10,29,14,37,13], compare:[4] },
+        { line:8, desc:"Swap arr[1]=29 with arr[4]=13", vars:{}, arr:[10,29,14,37,13], swapping:[1,4] },
+        { line:8, desc:"arr = [10, 13, 14, 37, 29]. 10, 13 sorted ✓", vars:{arr:[10,13,14,37,29]}, arr:[10,13,14,37,29], sorted:[0,1] },
+        { line:3, desc:"i = 2. Find minimum in [14, 37, 29]", vars:{i:2} },
+        { line:5, desc:"min_idx=2. j=3: 37>14. j=4: 29>14. No change.", vars:{min_idx:2} },
+        { line:8, desc:"Swap arr[2] with itself — 14 is already minimum!", vars:{}, arr:[10,13,14,37,29] },
+        { line:8, desc:"arr = [10, 13, 14, 37, 29]. 10,13,14 sorted ✓", vars:{arr:[10,13,14,37,29]}, arr:[10,13,14,37,29], sorted:[0,1,2] },
+        { line:3, desc:"i = 3. Find minimum in [37, 29]", vars:{i:3} },
+        { line:5, desc:"j=4: 29 < 37 → min_idx = 4", vars:{min_idx:4}, arr:[10,13,14,37,29], compare:[3,4] },
+        { line:8, desc:"Swap arr[3]=37 with arr[4]=29", vars:{}, arr:[10,13,14,37,29], swapping:[3,4] },
+        { line:10, desc:"✅ arr = [10, 13, 14, 29, 37]. Fully sorted!", vars:{arr:[10,13,14,29,37]}, arr:[10,13,14,29,37], sorted:[0,1,2,3,4], output:"[10, 13, 14, 29, 37]" }
+      ]
+    }
+  },
+  javascript: {
+    "Bubble Sort": {
+      code: `let arr = [64, 34, 25, 12, 22, 11, 90];
+let n = arr.length;
+
+for (let i = 0; i < n; i++) {
+  for (let j = 0; j < n - i - 1; j++) {
+    if (arr[j] > arr[j + 1]) {
+      let temp = arr[j];
+      arr[j] = arr[j + 1];
+      arr[j + 1] = temp;
+    }
+  }
+}
+
+console.log(arr);`,
+      steps: [
+        { line:0, desc:"Initialize array with 7 unsorted values", vars:{arr:[64,34,25,12,22,11,90]}, arr:[64,34,25,12,22,11,90] },
+        { line:1, desc:"n = arr.length = 7", vars:{n:7} },
+        { line:3, desc:"Outer loop: i = 0", vars:{i:0} },
+        { line:4, desc:"Inner loop: j = 0. Compare arr[0]=64 vs arr[1]=34", vars:{j:0}, arr:[64,34,25,12,22,11,90], compare:[0,1] },
+        { line:5, desc:"64 > 34 — entering swap block", vars:{}, swapping:[0,1] },
+        { line:6, desc:"let temp = arr[0] = 64", vars:{temp:64} },
+        { line:7, desc:"arr[0] = arr[1] = 34", vars:{arr:[34,64,25,12,22,11,90]}, arr:[34,64,25,12,22,11,90] },
+        { line:8, desc:"arr[1] = temp = 64. Swap complete.", vars:{}, arr:[34,64,25,12,22,11,90] },
+        { line:4, desc:"j=1. Compare 64 vs 25 — swap!", vars:{j:1}, arr:[34,64,25,12,22,11,90], compare:[1,2] },
+        { line:8, desc:"arr = [34, 25, 64, 12, 22, 11, 90]", vars:{arr:[34,25,64,12,22,11,90]}, arr:[34,25,64,12,22,11,90], swapping:[1,2] },
+        { line:4, desc:"j=2. Compare 64 vs 12 — swap!", vars:{j:2}, arr:[34,25,64,12,22,11,90], compare:[2,3] },
+        { line:8, desc:"arr = [34, 25, 12, 64, 22, 11, 90]", vars:{arr:[34,25,12,64,22,11,90]}, arr:[34,25,12,64,22,11,90], swapping:[2,3] },
+        { line:4, desc:"j=3. Compare 64 vs 22 — swap!", vars:{j:3}, arr:[34,25,12,64,22,11,90], compare:[3,4] },
+        { line:8, desc:"arr = [34, 25, 12, 22, 64, 11, 90]", vars:{arr:[34,25,12,22,64,11,90]}, arr:[34,25,12,22,64,11,90], swapping:[3,4] },
+        { line:4, desc:"j=4. Compare 64 vs 11 — swap!", vars:{j:4}, arr:[34,25,12,22,64,11,90], compare:[4,5] },
+        { line:8, desc:"arr = [34, 25, 12, 22, 11, 64, 90]", vars:{arr:[34,25,12,22,11,64,90]}, arr:[34,25,12,22,11,64,90], swapping:[4,5] },
+        { line:4, desc:"j=5. Compare 64 vs 90 — no swap (64 < 90)", vars:{j:5}, arr:[34,25,12,22,11,64,90], compare:[5,6] },
+        { line:3, desc:"Pass 1 done. 90 is in place ✓", vars:{i:1}, arr:[34,25,12,22,11,64,90], sorted:[6] },
+        { line:3, desc:"Pass 2 complete — 64, 90 sorted ✓", vars:{i:2}, arr:[25,12,22,11,34,64,90], sorted:[5,6] },
+        { line:3, desc:"Pass 3 complete — 34, 64, 90 sorted ✓", vars:{i:3}, arr:[12,22,11,25,34,64,90], sorted:[4,5,6] },
+        { line:3, desc:"Pass 4 complete — 25+ sorted ✓", vars:{i:4}, arr:[12,11,22,25,34,64,90], sorted:[3,4,5,6] },
+        { line:3, desc:"Pass 5: final swap 12 and 11", vars:{i:5}, arr:[11,12,22,25,34,64,90], sorted:[2,3,4,5,6] },
+        { line:13, desc:"✅ console.log([11, 12, 22, 25, 34, 64, 90])", vars:{arr:[11,12,22,25,34,64,90]}, arr:[11,12,22,25,34,64,90], sorted:[0,1,2,3,4,5,6], output:"[11, 12, 22, 25, 34, 64, 90]" }
+      ]
+    },
+    "Factorial": {
+      code: `function factorial(n) {
+  if (n === 0 || n === 1) {
+    return 1;
+  }
+  let result = 1;
+  for (let i = 2; i <= n; i++) {
+    result = result * i;
+  }
+  return result;
+}
+
+let answer = factorial(6);
+console.log(answer);`,
+      steps: [
+        { line:11, desc:"Call factorial(6)", vars:{n:6} },
+        { line:1, desc:"n=6. Is 6 === 0 or 6 === 1? No.", vars:{} },
+        { line:4, desc:"Initialize result = 1", vars:{result:1} },
+        { line:5, desc:"Loop starts: i = 2", vars:{i:2} },
+        { line:6, desc:"result = 1 × 2 = 2", vars:{result:2} },
+        { line:5, desc:"i = 3", vars:{i:3} },
+        { line:6, desc:"result = 2 × 3 = 6", vars:{result:6} },
+        { line:5, desc:"i = 4", vars:{i:4} },
+        { line:6, desc:"result = 6 × 4 = 24", vars:{result:24} },
+        { line:5, desc:"i = 5", vars:{i:5} },
+        { line:6, desc:"result = 24 × 5 = 120", vars:{result:120} },
+        { line:5, desc:"i = 6", vars:{i:6} },
+        { line:6, desc:"result = 120 × 6 = 720", vars:{result:720} },
+        { line:8, desc:"Return 720", vars:{} },
+        { line:12, desc:"✅ answer = 720. 6! = 720", vars:{answer:720}, output:"720" }
+      ]
+    },
+    "Linear Search": {
+      code: `function linearSearch(arr, target) {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] === target) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+let data = [3, 7, 1, 9, 4, 6, 2, 8];
+let idx = linearSearch(data, 9);
+console.log("Found at index:", idx);`,
+      steps: [
+        { line:9, desc:"Define data array: [3, 7, 1, 9, 4, 6, 2, 8]", vars:{data:[3,7,1,9,4,6,2,8]}, arr:[3,7,1,9,4,6,2,8] },
+        { line:10, desc:"Call linearSearch(data, 9). Looking for 9.", vars:{target:9} },
+        { line:1, desc:"i = 0. Check arr[0] = 3", vars:{i:0}, arr:[3,7,1,9,4,6,2,8], compare:[0] },
+        { line:2, desc:"3 === 9? No. Move on.", vars:{} },
+        { line:1, desc:"i = 1. Check arr[1] = 7", vars:{i:1}, arr:[3,7,1,9,4,6,2,8], compare:[1] },
+        { line:2, desc:"7 === 9? No.", vars:{} },
+        { line:1, desc:"i = 2. Check arr[2] = 1", vars:{i:2}, arr:[3,7,1,9,4,6,2,8], compare:[2] },
+        { line:2, desc:"1 === 9? No.", vars:{} },
+        { line:1, desc:"i = 3. Check arr[3] = 9", vars:{i:3}, arr:[3,7,1,9,4,6,2,8], compare:[3] },
+        { line:2, desc:"9 === 9? YES! 🎯 Found it!", vars:{}, arr:[3,7,1,9,4,6,2,8], sorted:[3] },
+        { line:3, desc:"Return index 3", vars:{idx:3} },
+        { line:11, desc:"✅ Found 9 at index 3!", vars:{idx:3}, output:"Found at index: 3" }
+      ]
+    },
+    "Two Sum": {
+      code: `function twoSum(nums, target) {
+  const map = new Map();
+  for (let i = 0; i < nums.length; i++) {
+    let complement = target - nums[i];
+    if (map.has(complement)) {
+      return [map.get(complement), i];
+    }
+    map.set(nums[i], i);
+  }
+  return [];
+}
+
+let result = twoSum([2, 7, 11, 15], 9);
+console.log(result);`,
+      steps: [
+        { line:12, desc:"Call twoSum([2, 7, 11, 15], 9). Find two numbers that sum to 9.", vars:{nums:[2,7,11,15], target:9}, arr:[2,7,11,15] },
+        { line:1, desc:"Create an empty Map to store seen values", vars:{map:{}} },
+        { line:2, desc:"i = 0. Current number: nums[0] = 2", vars:{i:0}, arr:[2,7,11,15], compare:[0] },
+        { line:3, desc:"complement = 9 - 2 = 7. Is 7 in map? No.", vars:{complement:7} },
+        { line:7, desc:"Store map.set(2, 0). Map: {2→0}", vars:{map:"{ 2→0 }"} },
+        { line:2, desc:"i = 1. Current number: nums[1] = 7", vars:{i:1}, arr:[2,7,11,15], compare:[1] },
+        { line:3, desc:"complement = 9 - 7 = 2. Is 2 in map? YES! 🎯", vars:{complement:2} },
+        { line:4, desc:"map.get(2) = 0. Return [0, 1]", vars:{}, arr:[2,7,11,15], sorted:[0,1] },
+        { line:13, desc:"✅ result = [0, 1]. nums[0]+nums[1] = 2+7 = 9", vars:{result:"[0, 1]"}, output:"[0, 1]" }
+      ]
+    }
+  },
+  java: {
+    "Bubble Sort": {
+      code: `int[] arr = {64, 34, 25, 12, 22, 11, 90};
+int n = arr.length;
+
+for (int i = 0; i < n; i++) {
+  for (int j = 0; j < n-i-1; j++) {
+    if (arr[j] > arr[j+1]) {
+      int temp = arr[j];
+      arr[j] = arr[j+1];
+      arr[j+1] = temp;
+    }
+  }
+}
+
+System.out.println(Arrays.toString(arr));`,
+      steps: [
+        { line:0, desc:"Declare and initialize int array", vars:{arr:[64,34,25,12,22,11,90]}, arr:[64,34,25,12,22,11,90] },
+        { line:1, desc:"n = arr.length = 7", vars:{n:7} },
+        { line:3, desc:"Outer loop: i = 0", vars:{i:0} },
+        { line:4, desc:"Inner loop: j = 0. Compare arr[0]=64 vs arr[1]=34", vars:{j:0}, arr:[64,34,25,12,22,11,90], compare:[0,1] },
+        { line:5, desc:"64 > 34 — entering swap block", vars:{}, arr:[64,34,25,12,22,11,90], swapping:[0,1] },
+        { line:6, desc:"int temp = arr[0] = 64", vars:{temp:64} },
+        { line:7, desc:"arr[0] = arr[1] = 34", vars:{arr:[34,64,25,12,22,11,90]}, arr:[34,64,25,12,22,11,90] },
+        { line:8, desc:"arr[1] = temp = 64. Swap complete.", vars:{}, arr:[34,64,25,12,22,11,90] },
+        { line:4, desc:"j=1. Compare 64 vs 25 — swap!", vars:{j:1}, arr:[34,64,25,12,22,11,90], compare:[1,2] },
+        { line:8, desc:"arr = [34, 25, 64, 12, 22, 11, 90]", vars:{arr:[34,25,64,12,22,11,90]}, arr:[34,25,64,12,22,11,90], swapping:[1,2] },
+        { line:4, desc:"j=2. Compare 64 vs 12 — swap!", vars:{j:2}, arr:[34,25,64,12,22,11,90], compare:[2,3] },
+        { line:8, desc:"arr = [34, 25, 12, 64, 22, 11, 90]", vars:{arr:[34,25,12,64,22,11,90]}, arr:[34,25,12,64,22,11,90], swapping:[2,3] },
+        { line:4, desc:"j=3. Compare 64 vs 22 — swap!", vars:{j:3}, arr:[34,25,12,64,22,11,90], compare:[3,4] },
+        { line:8, desc:"arr = [34, 25, 12, 22, 64, 11, 90]", vars:{arr:[34,25,12,22,64,11,90]}, arr:[34,25,12,22,64,11,90], swapping:[3,4] },
+        { line:4, desc:"j=4. Compare 64 vs 11 — swap!", vars:{j:4}, arr:[34,25,12,22,64,11,90], compare:[4,5] },
+        { line:8, desc:"arr = [34, 25, 12, 22, 11, 64, 90]", vars:{arr:[34,25,12,22,11,64,90]}, arr:[34,25,12,22,11,64,90], swapping:[4,5] },
+        { line:4, desc:"j=5. Compare 64 vs 90 — no swap", vars:{j:5}, arr:[34,25,12,22,11,64,90], compare:[5,6] },
+        { line:3, desc:"Pass 1 done. 90 is in place ✓", vars:{i:1}, arr:[34,25,12,22,11,64,90], sorted:[6] },
+        { line:3, desc:"Passes 2-4 complete: 11,12,22,25 bubbling into place...", vars:{i:4}, arr:[11,12,22,25,34,64,90], sorted:[3,4,5,6] },
+        { line:13, desc:"✅ Arrays.toString(arr) = [11, 12, 22, 25, 34, 64, 90]", vars:{arr:[11,12,22,25,34,64,90]}, arr:[11,12,22,25,34,64,90], sorted:[0,1,2,3,4,5,6], output:"[11, 12, 22, 25, 34, 64, 90]" }
+      ]
+    },
+    "Selection Sort": {
+      code: `int[] arr = {29, 10, 14, 37, 13};
+int n = arr.length;
+
+for (int i = 0; i < n-1; i++) {
+  int minIdx = i;
+  for (int j = i+1; j < n; j++) {
+    if (arr[j] < arr[minIdx]) {
+      minIdx = j;
+    }
+  }
+  int temp = arr[minIdx];
+  arr[minIdx] = arr[i];
+  arr[i] = temp;
+}
+
+System.out.println(Arrays.toString(arr));`,
+      steps: [
+        { line:0, desc:"Initialize array {29, 10, 14, 37, 13}", vars:{arr:[29,10,14,37,13]}, arr:[29,10,14,37,13] },
+        { line:1, desc:"n = 5", vars:{n:5} },
+        { line:3, desc:"i = 0. Find minimum in entire array.", vars:{i:0} },
+        { line:4, desc:"minIdx = 0 (arr[0]=29 is assumed minimum)", vars:{minIdx:0}, arr:[29,10,14,37,13], compare:[0] },
+        { line:5, desc:"j=1: arr[1]=10 < arr[0]=29 → minIdx = 1", vars:{j:1,minIdx:1}, arr:[29,10,14,37,13], compare:[1] },
+        { line:5, desc:"j=2: arr[2]=14 < arr[1]=10? No.", vars:{j:2}, arr:[29,10,14,37,13], compare:[2] },
+        { line:5, desc:"j=3: arr[3]=37 < arr[1]=10? No.", vars:{j:3}, arr:[29,10,14,37,13], compare:[3] },
+        { line:5, desc:"j=4: arr[4]=13 < arr[1]=10? No. Done.", vars:{j:4}, arr:[29,10,14,37,13], compare:[4] },
+        { line:10, desc:"int temp = arr[1] = 10", vars:{temp:10} },
+        { line:11, desc:"arr[1] = arr[0] = 29", vars:{} },
+        { line:12, desc:"arr[0] = temp = 10. Swap complete!", vars:{arr:[10,29,14,37,13]}, arr:[10,29,14,37,13], sorted:[0] },
+        { line:3, desc:"i = 1. Find minimum in [29, 14, 37, 13]", vars:{i:1} },
+        { line:4, desc:"minIdx = 1", vars:{minIdx:1} },
+        { line:5, desc:"j=2: 14<29 → minIdx=2. j=3: 37>14. j=4: 13<14 → minIdx=4", vars:{minIdx:4,j:4}, arr:[10,29,14,37,13], compare:[4] },
+        { line:12, desc:"Swap arr[1]=29 with arr[4]=13. arr = [10, 13, 14, 37, 29]", vars:{arr:[10,13,14,37,29]}, arr:[10,13,14,37,29], sorted:[0,1], swapping:[1,4] },
+        { line:3, desc:"i = 2. Find minimum in [14, 37, 29]", vars:{i:2} },
+        { line:5, desc:"j=3: 37>14. j=4: 29>14. minIdx stays 2.", vars:{minIdx:2} },
+        { line:12, desc:"Swap arr[2] with itself — already minimum!", vars:{arr:[10,13,14,37,29]}, arr:[10,13,14,37,29], sorted:[0,1,2] },
+        { line:3, desc:"i = 3. Find minimum in [37, 29]", vars:{i:3} },
+        { line:5, desc:"j=4: 29 < 37 → minIdx = 4", vars:{minIdx:4}, arr:[10,13,14,37,29], compare:[3,4] },
+        { line:12, desc:"Swap arr[3]=37 with arr[4]=29.", vars:{}, arr:[10,13,14,37,29], swapping:[3,4] },
+        { line:15, desc:"✅ Arrays.toString(arr) = [10, 13, 14, 29, 37]", vars:{arr:[10,13,14,29,37]}, arr:[10,13,14,29,37], sorted:[0,1,2,3,4], output:"[10, 13, 14, 29, 37]" }
+      ]
+    },
+    "Binary Search": {
+      code: `int[] arr = {2, 5, 8, 12, 16, 23, 38, 56, 72, 91};
+int target = 23;
+int low = 0, high = arr.length - 1;
+
+while (low <= high) {
+  int mid = (low + high) / 2;
+  if (arr[mid] == target) {
+    System.out.println("Found at: " + mid);
+    break;
+  } else if (arr[mid] < target) {
+    low = mid + 1;
+  } else {
+    high = mid - 1;
+  }
+}`,
+      steps: [
+        { line:0, desc:"Sorted int array of 10 values", vars:{arr:[2,5,8,12,16,23,38,56,72,91]}, arr:[2,5,8,12,16,23,38,56,72,91] },
+        { line:1, desc:"target = 23", vars:{target:23} },
+        { line:2, desc:"low = 0, high = 9", vars:{low:0,high:9} },
+        { line:4, desc:"0 <= 9 — enter while loop", vars:{} },
+        { line:5, desc:"mid = (0 + 9) / 2 = 4", vars:{mid:4}, arr:[2,5,8,12,16,23,38,56,72,91], compare:[4] },
+        { line:6, desc:"arr[4] = 16. Is 16 == 23? No.", vars:{} },
+        { line:9, desc:"16 < 23 — target in right half. low = mid+1 = 5", vars:{low:5} },
+        { line:4, desc:"5 <= 9 — continue", vars:{} },
+        { line:5, desc:"mid = (5 + 9) / 2 = 7", vars:{mid:7}, arr:[2,5,8,12,16,23,38,56,72,91], compare:[7] },
+        { line:6, desc:"arr[7] = 56. Is 56 == 23? No.", vars:{} },
+        { line:11, desc:"56 > 23 — target in left half. high = mid-1 = 6", vars:{high:6} },
+        { line:4, desc:"5 <= 6 — continue", vars:{} },
+        { line:5, desc:"mid = (5 + 6) / 2 = 5", vars:{mid:5}, arr:[2,5,8,12,16,23,38,56,72,91], compare:[5] },
+        { line:6, desc:"arr[5] = 23. Is 23 == 23? YES! 🎯", vars:{}, arr:[2,5,8,12,16,23,38,56,72,91], sorted:[5] },
+        { line:7, desc:"✅ Found at index 5!", vars:{}, output:"Found at: 5" }
+      ]
+    }
+  }
+};
+
+// ── State ──
+let currentLang = 'python';
+let currentSteps = [];
+let currentStep = -1;
+let autoTimer = null;
+let prevVars = {};
+let speedMs = 750;
+
+// ── DOM refs ──
+const snippetSelect = document.getElementById('snippet-select');
+const codeLines     = document.getElementById('code-lines');
+const varsBody      = document.getElementById('vars-body');
+const stepNum       = document.getElementById('step-num');
+const stepDesc      = document.getElementById('step-desc');
+const outputBody    = document.getElementById('output-body');
+const prevBtn       = document.getElementById('prev-btn');
+const nextBtn       = document.getElementById('next-btn');
+const autoBtn       = document.getElementById('auto-btn');
+const resetBtn      = document.getElementById('reset-btn');
+const progressFill  = document.getElementById('progress-bar-fill');
+const stepCounter   = document.getElementById('step-counter');
+const arrayViz      = document.getElementById('array-viz');
+const speedRange    = document.getElementById('speed-range');
+const legend        = document.getElementById('legend');
+
+// ── Speed ──
+const speedMap = { 1: 1500, 2: 1000, 3: 700, 4: 400, 5: 200 };
+speedRange.addEventListener('input', () => {
+  speedMs = speedMap[speedRange.value] || 700;
+  if (autoTimer) { stopAuto(); startAuto(); }
+});
+
+// ── Language buttons ──
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentLang = btn.dataset.lang;
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b === btn));
+    populateSnippets();
+    reset();
+  });
+});
+
+// ── Snippets ──
+function populateSnippets() {
+  snippetSelect.innerHTML = '';
+  const snips = SNIPPETS[currentLang];
+  Object.keys(snips).forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = name;
+    snippetSelect.appendChild(opt);
+  });
+  loadSnippet(Object.keys(snips)[0]);
+}
+
+snippetSelect.addEventListener('change', () => loadSnippet(snippetSelect.value));
+
+function loadSnippet(name) {
+  const snip = SNIPPETS[currentLang][name];
+  renderCode(snip.code);
+  currentSteps = snip.steps;
+  reset();
+}
+
+// ── Render code ──
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderCode(code) {
+  const lines = code.split('\n');
+  codeLines.innerHTML = '';
+  lines.forEach((l, i) => {
+    const div = document.createElement('div');
+    div.className = 'code-line';
+    div.id = 'cl-' + i;
+    div.innerHTML = '<span class="line-num">' + (i + 1) + '</span><span class="line-text">' + esc(l) + '</span>';
+    codeLines.appendChild(div);
+  });
+}
+
+// ── Show step ──
+function showStep(idx) {
+  if (idx < 0 || idx >= currentSteps.length) return;
+  currentStep = idx;
+  const s = currentSteps[idx];
+
+  // Highlight line
+  document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+  const activeLine = document.getElementById('cl-' + s.line);
+  if (activeLine) {
+    activeLine.classList.add('active');
+    activeLine.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  // Variables
+  const changedKeys = new Set();
+  if (s.vars) {
+    Object.entries(s.vars).forEach(([k, v]) => {
+      if (v !== null && v !== undefined && JSON.stringify(prevVars[k]) !== JSON.stringify(v)) {
+        changedKeys.add(k);
+      }
+    });
+    Object.assign(prevVars, s.vars);
+  }
+
+  const allVars = { ...prevVars };
+  const validVars = Object.entries(allVars).filter(([, v]) => v !== null && v !== undefined);
+
+  if (validVars.length === 0) {
+    varsBody.innerHTML = '<p class="empty-state">No variables tracked yet</p>';
+  } else {
+    varsBody.innerHTML = '';
+    validVars.forEach(([k, v]) => {
+      const row = document.createElement('div');
+      row.className = 'var-row';
+      const valStr = Array.isArray(v) ? '[' + v.join(', ') + ']' : String(v);
+      const changed = changedKeys.has(k);
+      row.innerHTML =
+        '<span class="var-name">' + esc(k) + '</span>' +
+        '<span class="var-val' + (changed ? ' var-changed' : '') + '">' + esc(valStr) + '</span>';
+      varsBody.appendChild(row);
+    });
+  }
+
+  // Step info
+  stepNum.textContent = 'Step ' + (idx + 1) + ' of ' + currentSteps.length;
+  stepDesc.textContent = s.desc || '';
+
+  // Output
+  if (s.output) {
+    outputBody.innerHTML =
+      '<div class="out-line"><span class="out-prompt">›</span><span class="out-text">' + esc(s.output) + '</span></div>';
+  }
+
+  // Array viz
+  if (s.arr) {
+    arrayViz.style.display = 'flex';
+    legend.style.display = 'flex';
+    arrayViz.innerHTML = '';
+    s.arr.forEach((val, i) => {
+      const cell = document.createElement('div');
+      cell.className = 'arr-cell';
+      if (s.sorted && s.sorted.includes(i))   cell.classList.add('sorted');
+      else if (s.swapping && s.swapping.includes(i)) cell.classList.add('swapping');
+      else if (s.compare && s.compare.includes(i))   cell.classList.add('comparing');
+      else if (s.pivot === i) cell.classList.add('pivot');
+      cell.textContent = val;
+      arrayViz.appendChild(cell);
+    });
+  }
+
+  // Progress
+  const pct = currentSteps.length > 1 ? Math.round((idx / (currentSteps.length - 1)) * 100) : 100;
+  progressFill.style.width = pct + '%';
+  stepCounter.textContent = (idx + 1) + ' / ' + currentSteps.length;
+
+  prevBtn.disabled = idx <= 0;
+  nextBtn.disabled = idx >= currentSteps.length - 1;
+  autoBtn.disabled = false;
+
+  if (idx >= currentSteps.length - 1) stopAuto();
+}
+
+// ── Controls ──
+function reset() {
+  stopAuto();
+  currentStep = -1;
+  prevVars = {};
+  document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+  varsBody.innerHTML = '<p class="empty-state">Press Visualize to start</p>';
+  stepNum.textContent = '—';
+  stepDesc.textContent = 'Select a snippet and press Visualize';
+  outputBody.innerHTML = '<span class="out-empty">no output yet</span>';
+  progressFill.style.width = '0%';
+  stepCounter.textContent = '0 / ' + currentSteps.length;
+  prevBtn.disabled = true;
+  nextBtn.disabled = true;
+  autoBtn.disabled = true;
+  arrayViz.style.display = 'none';
+  arrayViz.innerHTML = '';
+  legend.style.display = 'none';
+}
+
+function startAuto() {
+  autoBtn.innerHTML = '<i class="ti ti-player-pause"></i> Pause';
+  if (currentStep >= currentSteps.length - 1) currentStep = -1;
+  autoTimer = setInterval(() => {
+    if (currentStep >= currentSteps.length - 1) { stopAuto(); return; }
+    showStep(currentStep + 1);
+  }, speedMs);
+}
+
+function stopAuto() {
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+  autoBtn.innerHTML = '<i class="ti ti-player-play"></i> Auto';
+}
+
+document.getElementById('run-btn').addEventListener('click', () => {
+  reset();
+  setTimeout(() => {
+    nextBtn.disabled = false;
+    autoBtn.disabled = false;
+    showStep(0);
+  }, 60);
+});
+
+nextBtn.addEventListener('click', () => { stopAuto(); showStep(currentStep + 1); });
+prevBtn.addEventListener('click', () => { stopAuto(); showStep(currentStep - 1); });
+resetBtn.addEventListener('click', reset);
+autoBtn.addEventListener('click', () => { autoTimer ? stopAuto() : startAuto(); });
+
+// ── Init ──
+populateSnippets();
+</script>
+</body>
+</html>
